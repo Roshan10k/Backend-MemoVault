@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const sequelize = require('./database/db.js');
 
 
 //creating a server
@@ -9,7 +10,7 @@ const app = express();
 
 // creating a port
 
-const port = 4000;
+const port = 6000;
 
 //creating a middleware
 app.use(cors())
