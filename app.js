@@ -1,35 +1,61 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const sequelize = require('./database/db.js');
-const userRoutes = require('./routes/userRoutes.js')
+const userRoutes = require('./routes/userRoutes.js');
+const memoryRoutes = require('./routes/memoryRoutes.js'); 
+const bucketlistRoutes = require('./routes/bucketlistRoutes.js');
+const lettertoselfRoutes = require('./routes/lettertoselfRoutes.js');
+const yearlygoalsRoutes = require('./routes/yearlygoalsRoutes.js')
+require("dotenv").config();
 
-
-//creating a server
-
+// Creating a server
 const app = express();
 
-// creating a port
+// Creating a port
+const port = 8080;
 
-const port = 6000;
+// CORS configuration
+app.use(cors({
+    origin: "http://localhost:5173", // Your React app's URL
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allow required methods
+    credentials: true // Enable sending cookies
+}));
+
+// Middleware for JSON and URL encoding
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Add this middleware to serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Sample route
+app.get('/notice', (req, res) => {
+    res.send("This is notice");
+});
+
+// User routes
+app.use('/users', userRoutes);
 
 
-//creating a middleware
-app.use(cors())
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: true}))
+// Memory routes
+app.use('/memories', memoryRoutes);
 
-app.get(`/`,(req,res)=>{
-    res.send("Welcome to the Page")
-})
+//BucketList routes
+app.use("/bucketlist", bucketlistRoutes);
 
-app.get(`/notice`,(req,res)=>{
-    res.send("This is notice")
-})
+//Letter To Self routes
+app.use("/lettertoself", lettertoselfRoutes);
 
-app.get('/user',userRoutes);
+//Yearly Goals routes
+app.use("/yearlygoals",yearlygoalsRoutes );
 
-//running on port
-app.listen(port, ()=> {
-    console.log(`server runnninig on .............port ${port}`)
-})
+// Running the server and syncing the database
+sequelize.sync({ alter: true }).then(() => {
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+}).catch(err => {
+    console.log("Database sync error:", err);
+});
